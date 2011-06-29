@@ -48,10 +48,14 @@ describe("Variable Sync", function() {
     
   });
   
+  
+  
   it("can sync complicated objects from client to server", function() {
     
     function setIfEqual(k, v){
+    
       equals = key === k && SpecHelper.deepEqual(v, val);
+      
     }
     
     var key = SpecHelper.generateRandomString();
@@ -59,7 +63,6 @@ describe("Variable Sync", function() {
     
     // Create new variables
     now[key] = val;
-    
     
     // Call server function to check if value synced
     var equals;

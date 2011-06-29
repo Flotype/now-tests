@@ -15,6 +15,7 @@ describe("Server scoping tests", function() {
     
     waits(500);
     
+    
     var nowReady = false;
     
     runs(function(){
