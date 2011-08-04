@@ -49,4 +49,4 @@ everyone.now.joinGroup = function(group) {
   nowjs.getGroup(group).addUser(this.user.clientId);
 }
 
-server.listen(80)
+server.listen(8080)

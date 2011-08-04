@@ -8,22 +8,44 @@
   <script type="text/javascript" src="lib/jasmine-1.0.2/jasmine-html.js"></script>
 
   <!-- include source files here... -->
+  <script type = "text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
   <script type="text/javascript" src="nowjs/now.js"></script>
   <script type="text/javascript" src="spec/SpecHelper.js"></script>
   
-  <!-- include spec files here... -->
-  <script type="text/javascript" src="spec/RemoteSpec.js"></script>
-  <script type="text/javascript" src="spec/ScopeSpec.js"></script>
-  <script type="text/javascript" src="spec/VariableSpec.js"></script>
+  <!-- include spec files here...
+ <script type="text/javascript" src="spec/RemoteSpec.js"></script> -->
+ <script type="text/javascript" src="spec/ScopeSpec.js"></script> 
+ <script type="text/javascript" src="spec/VariableSpec.js"></script>  
+ <script type="text/javascript" src="spec/ClusterSpec.js"></script>
 
 </head>
 <body>
 
 <script type="text/javascript">
-  now.ready(function(){
-    jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
-    jasmine.getEnv().execute();
+
+  $(document).ready(function(){
+    now.clientside = function(cb){
+      cb();
+    }
+
+    now.clientside2 = function(one, three){
+      one(function two(){
+        three();
+      });
+    }
+
+    now.getKey = function(key, cb){
+      cb(now[key]);
+    }
+
+
+    now.ready(function(){
+      jasmine.getEnv().addReporter(new jasmine.TrivialReporter());
+      jasmine.getEnv().execute();
+    });
+
   });
+  
 </script>
 
 </body>

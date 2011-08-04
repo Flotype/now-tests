@@ -44,8 +44,6 @@ describe("Server scoping tests", function() {
     now.joinGroup(group);
     now.setGroupValue(group, key, val);
     
-    
-    
     runs(function(){
       window2 = SpecHelper.generateIFrame('now.html');
     });
