@@ -2,10 +2,33 @@
   "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-  <title>Now client</title>
+<title>Now client</title>
 
   <!-- include source files here... -->
-  <script type="text/javascript" src="http://localhost:81/nowjs/now.js"></script>
+<script type = "text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script type="text/javascript"src="http://localhost:8080/nowjs/now.js"></script>
+
+<script type="text/javascript">
+  $(document).ready(function(){
+    now.clientside = function(cb){
+      cb();
+    }
+
+    now.clientside2 = function(one, three){
+      one(function two(){
+        three();
+      });
+    }
+
+    now.getKey = function(key, cb){
+      cb(now[key]);
+    }
+
+ });
+</script>
+
+
+
 </head>
 <body>
 
