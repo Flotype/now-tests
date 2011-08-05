@@ -1,4 +1,4 @@
-xdescribe("Remote function calls", function() {
+describe("Remote function calls", function() {
   
   it("can call a remote function", function() {
     

@@ -1,6 +1,6 @@
 describe("Variable Sync", function() {
   
-  xit("can sync primitives from client to server", function() {
+  it("can sync primitives from client to server", function() {
     
     function setIfEqual(k, v) {
       equals = val === v && key === k;
@@ -110,7 +110,7 @@ describe("Variable Sync", function() {
     
   });
   
-  xit("can sync complicated objects from client to server", function() {
+  it("can sync complicated objects from client to server", function() {
     
     function setIfEqual(k, v){
       equals = key === k && SpecHelper.deepEqual(v, val);
@@ -197,7 +197,7 @@ describe("Variable Sync", function() {
     
   });
   
-  xit("can handle deep objects synced from server and watch along the path", function(){
+  it("can handle deep objects synced from server and watch along the path", function(){
   
     
     function setIfEqual(k, v){
@@ -229,106 +229,29 @@ describe("Variable Sync", function() {
     });
   });
   
-  xit("can sync complicated arrays from client to server", function() {
+  it("can support server calling client functions with callbacks", function() {
     
-    function setIfEqual(k, v){
-      equals = key === k && SpecHelper.deepEqual(v, val);
+    var called = false;
+    
+    
+    now.cb = function(cb){cb();};
+    
+    now.setIfCalled = function(){
+      called = true;
     }
     
-    var key = SpecHelper.generateRandomString();
-    var val = [1, 2];
-    
-    // Create new variables
-    now[key] = val;
-    
-    
-    // Call server function to check if value synced
-    var equals;
+    	
     runs(function(){
-      now.variableCheck(key, setIfEqual);
+      now.eval("this.now.cb(function(){  this.now.setIfCalled(); });");
     });
     
     waitsFor(function(){
-      return equals;
-    }, "server to confirm array was set", 5000);
+      return called;
+    }, "server to callback was called", 5000);
     
     runs(function(){
-      expect(equals).toBeTruthy();
+      expect(called).toBeTruthy();
     });
-    
-    runs(function(){
-      now[key][0] = SpecHelper.generateRandomString(); 
-      val = now[key];
-      equals = false;
-    });
-    
-    
-    runs(function(){
-      now.variableCheck(key, setIfEqual)
-    });
-    
-    waitsFor(function(){
-      return equals;
-    }, "server to confirm array element was changed", 5000);
-    
-    runs(function(){
-      expect(equals).toBeTruthy();
-    });
-    
-    runs(function(){
-      now[key][0] = {c: SpecHelper.generateRandomString(), d: 3};   
-      equals = false;
-    });
-    
-    
-    runs(function(){
-      now.variableCheck(key, setIfEqual)
-    });
-    
-    waitsFor(function(){
-      return equals;
-    }, "server to confirm array element changed to object", 5000);
-      
-      
-    runs(function(){
-      expect(equals).toBeTruthy();
-    });
-    
-    runs(function(){
-      now[key].pop();
-      equals = false;
-    });
-    
-    
-    runs(function(){
-      now.variableCheck(key, setIfEqual)
-    });
-    
-    waitsFor(function(){
-      return equals;
-    }, "server to confirm popping from array", 5000);
      
-    runs(function(){
-      expect(equals).toBeTruthy();
-    });
-    
-    runs(function(){
-      now[key].push(1);
-      equals = false;
-    });
-    
-    
-    runs(function(){
-      now.variableCheck(key, setIfEqual)
-    });
-    
-    waitsFor(function(){
-      return equals;
-    }, "server to confirm pushing to array", 5000);
-
-    runs(function(){
-      expect(equals).toBeTruthy();
-    });
-    
   });
 });
