@@ -139,6 +139,38 @@ describe("Variable Sync", function() {
     
   });
   
+  it("can handle deep objects synced from server and watch along the path", function(){
+  
+    
+    function setIfEqual(k, v){
+      return equals = key === k && SpecHelper.deepEqual(v, val);
+    }
+    
+    var key = SpecHelper.generateRandomString();
+    var val = {a: 1, b: {c: 1, d: {e: 1}}};
+    
+    now.setValue(key, val);
+    
+    // Call server function to check if value synced
+    var equals;
+    
+    waitsFor(function(){
+      return setIfEqual(key, now[key]);
+    }, "server to confirm object was set", 5000);
+    
+    runs(function(){
+      now[key]['b']['c'] = 6;
+    });
+    
+    runs(function(){
+      now.variableCheck(key, setIfEqual);
+    });
+    
+    runs(function(){
+      expect(equals).toBeTruthy();
+    });
+  });
+  
   it("can sync complicated arrays from client to server", function() {
     
     function setIfEqual(k, v){
