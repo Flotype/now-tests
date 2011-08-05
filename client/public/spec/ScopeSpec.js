@@ -1,4 +1,4 @@
-describe("Server scoping tests", function() {
+xdescribe("Server scoping tests", function() {
   
   it("adds to the defaultScope so new users get properties set in the `everyone.now` object", function() {
     var window2;

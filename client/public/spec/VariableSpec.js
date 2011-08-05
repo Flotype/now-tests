@@ -1,6 +1,6 @@
 describe("Variable Sync", function() {
   
-  it("can sync primitives from client to server", function() {
+  xit("can sync primitives from client to server", function() {
     
     function setIfEqual(k, v) {
       equals = val === v && key === k;
@@ -49,8 +49,68 @@ describe("Variable Sync", function() {
   });
   
   
+  it("can create terminal non-leaf nodes and do something with later ", function() {
+    
+    var key = SpecHelper.generateRandomString();
+    var key2 = SpecHelper.generateRandomString();
+    
+    var equals = false;
   
-  it("can sync complicated objects from client to server", function() {
+    now.eval("this.now['"+key+"'] = {a: 1, b: []}");
+    
+    waits(1000);
+    
+    runs(function(){
+      expect(now[key].b.length).toEqual(0);
+    
+      now.eval("this.now['"+key+"'].b.push(1)");
+      now.eval("this.now['"+key+"'].b[1] = 2");      
+    
+    });
+    
+    waits(1000);
+    
+    
+    runs(function(){
+      expect(now[key].b[0]).toEqual(1);
+      expect(now[key].b[1]).toEqual(2);
+      expect(now[key].b.length).toEqual(2);
+    
+      now[key2] = {a: 1, b: []};
+      
+      now.variableCheck(key2, function(k, v) {
+        console.log(arguments);
+        equals = v.b.length === 0;  
+      });
+    });
+    
+    waitsFor(function(){
+      return equals;
+    }, "server to confirm array set", 2000);
+    
+    runs(function(){
+      
+      equals = false;
+      
+      now[key2].b.push(1);
+      now[key2].b[1] = 2;
+      
+      now.variableCheck(key2, function(k, v) {
+        equals = v.b[0] === 1 && v.b[1] === 2 && v.b.length === 2;
+      });
+    
+    });
+    
+    waitsFor(function(){
+      return equals;
+    }, "server to confirm array changes were set", 2000);
+    
+    
+    
+    
+  });
+  
+  xit("can sync complicated objects from client to server", function() {
     
     function setIfEqual(k, v){
       equals = key === k && SpecHelper.deepEqual(v, val);
@@ -137,7 +197,7 @@ describe("Variable Sync", function() {
     
   });
   
-  it("can handle deep objects synced from server and watch along the path", function(){
+  xit("can handle deep objects synced from server and watch along the path", function(){
   
     
     function setIfEqual(k, v){
@@ -169,7 +229,7 @@ describe("Variable Sync", function() {
     });
   });
   
-  it("can sync complicated arrays from client to server", function() {
+  xit("can sync complicated arrays from client to server", function() {
     
     function setIfEqual(k, v){
       equals = key === k && SpecHelper.deepEqual(v, val);

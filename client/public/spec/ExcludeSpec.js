@@ -1,4 +1,4 @@
-describe("Exclude tests", function() {
+xdescribe("Exclude tests", function() {
   
   it("can exclude users from groups", function() {
     var window2;
