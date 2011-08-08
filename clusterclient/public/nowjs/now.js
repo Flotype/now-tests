@@ -16,37 +16,46 @@
     },
 
     set: function (fqn, val) {
+      if (fqnMap.data[fqn] !== undefined) {
+        fqnMap.deleteVar(fqn, val);
+      }
       var lastIndex = fqn.lastIndexOf('.');
       var parent = fqn.substring(0, lastIndex);
-      if (parent && !util.isArray(fqnMap.data[parent])) {
-        fqnMap.set(parent, []);
+      fqnMap.addParent(parent, fqn.substring(lastIndex + 1));
+      return (fqnMap.data[fqn] = val);
+    },
+
+    addParent: function (parent, key) {
+      if (parent) {
+        if (!util.isArray(fqnMap.data[parent])) {
+          fqnMap.set(parent, []); // Handle changing a non-object to an object.
+        }
+        fqnMap.data[parent].push(key);
       }
-      if (parent && fqnMap.data[fqn] === undefined)
-        fqnMap.data[parent].push(fqn.substring(lastIndex + 1));
-      return fqnMap.data[fqn] = val;
     },
 
     deleteVar: function (fqn) {
       var lastIndex = fqn.lastIndexOf('.');
       var parent = fqn.substring(0, lastIndex);
 
-      if (util.hasProperty(fqnMap.data, parent)) {
-        // Remove from its parent.
-        fqnMap.data[parent].splice(
-          util.indexOf(fqnMap.data[parent], fqn.substring(lastIndex + 1)),
-          1);
-      }
+      if (util.hasProperty(this.data, parent)) {
 
-      if (util.isArray(fqnMap.data[fqn])) {
-        for (var i = 0; i < fqnMap.data[fqn].length; i++) {
-          // Recursive delete all children.
-          fqnMap.deleteVar(fqn + '.' + fqnMap.data[fqn][i]);
+        // Remove from its parent.
+        var index = util.indexOf(this.data[parent], fqn.substring(lastIndex + 1));
+        if (index > -1) {
+          this.data[parent].splice(index, 1);
         }
       }
-      delete fqnMap.data[fqn];
+      if (util.isArray(this.data[fqn])) {
+        // Deleting a child will remove it via splice.
+        for (var i = 0; this.data[fqn].length;) {
+          // Recursive delete all children.
+          this.deleteVar(fqn + '.' + this.data[fqn][i]);
+        }
+      }
+      delete this.data[fqn];
     }
   };
-
   var util = {
     _events: {},
     // Event code from socket.io
@@ -58,9 +67,9 @@
       return util;
     },
 
-    indexOf: function(arr, val) {
-      for(var i = 0, ii = arr.length; i < ii; i++){
-        if(arr[i] == val){
+    indexOf: function (arr, val) {
+      for (var i = 0, ii = arr.length; i < ii; i++) {
+        if ("" + arr[i] === val) {
           return i;
         }
       }
@@ -98,7 +107,7 @@
       var path = fqn.split('.');
       var currVar = util.forceGetParentVarAtFqn(scope, fqn);
       var key = path.pop();
-      fqnMap.data[fqn] = value;
+      fqnMap.set(fqn, (value && typeof value === 'object') ? [] : value);
       currVar[key] = value;
       if (!(isIE || util.isArray(currVar))) {
         util.watch(currVar, key, fqn);
@@ -108,7 +117,6 @@
     forceGetParentVarAtFqn: function (scope, fqn) {
       var path = fqn.split('.');
       path.shift();
-
       var currVar = scope;
       while (path.length > 1) {
         var prop = path.shift();
@@ -143,7 +151,7 @@
       return Math.random().toString().substr(2);
     },
 
-    getValOrFqn: function(val, fqn) {
+    getValOrFqn: function (val, fqn) {
       if (typeof val === 'function') {
         if (val.remote) {
           return undefined;
@@ -209,7 +217,7 @@
     },
     core: {
       on: util.on,
-      options:{},
+      options: {},
       removeEvent: util.removeEvent,
       clientId: undefined
     }
@@ -290,7 +298,7 @@
     },
 
     // Handle the ready message from the server
-    serverReady: function() {
+    serverReady: function () {
       nowReady = true;
       lib.processNowScope();
       util.emit('ready');
@@ -332,7 +340,7 @@
       });
 
       // Handle the ready message from the server
-      socket.on('rd', function(data){
+      socket.on('rd', function (data) {
         if (++readied == 2)
           lib.serverReady();
       });
@@ -370,7 +378,7 @@
       lib.traverseScope(obj, path, data);
       // Send only for non-empty object
       for (var i in data) {
-        if(util.hasProperty(data, i) && data[i] !== undefined) {
+        if (util.hasProperty(data, i) && data[i] !== undefined) {
           socket.emit('rv', data);
           break;
         }
@@ -380,8 +388,9 @@
       if (obj && typeof obj === 'object') {
         var objIsArray = util.isArray(obj);
         var keys = fqnMap.get(path);
-
+        var hasProperties = false;
         for (var key in obj) {
+          hasProperties = true;
           var fqn = path + '.' + key;
           var val = obj[key];
 
@@ -391,10 +400,10 @@
           var type = typeof val;
           if (util.hasProperty(obj, key)) {
             if (isIE || objIsArray) {
-                if(!(val && type === 'object') && fqnMap.get(fqn) !== val) {
-                  fqnMap.set(fqn, val);
-                  data[fqn] = util.getValOrFqn(val, fqn);
-                }
+              if (!(val && type === 'object') && fqnMap.get(fqn) !== val) {
+                fqnMap.set(fqn, val);
+                data[fqn] = util.getValOrFqn(val, fqn);
+              }
             } else {
               if (fqnMap.get(fqn) === undefined) {
                 util.watch(obj, key, fqn);
@@ -407,13 +416,18 @@
           }
           lib.traverseScope(val, fqn, data);
         }
+        if (!(hasProperties || fqnMap.get(path))) {
+          fqnMap.set(path, []);
+          data[path] = obj;
+        }
         if (keys && typeof keys === 'object') {
           var toDelete = [];
           // Scan for deleted keys.
           for (var i = 0; i < keys.length; i++) {
-            if (obj[keys[i]] === undefined) {
+            if (keys[i] !== undefined && obj[keys[i]] === undefined) {
               toDelete.push(path + '.' + keys[i]);
               fqnMap.deleteVar(path + '.' + keys[i]);
+              --i;
             }
           }
           // Send message to server to delete from its database.
@@ -438,7 +452,7 @@
       lib.handleNewConnection(socket);
       // Begin intermittent scope traversal
 
-      setTimeout(function(){
+      setTimeout(function () {
         lib.processNowScope();
         socket.emit('rd');
         if (++readied == 2) {
