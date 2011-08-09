@@ -17,6 +17,10 @@ var SpecHelper = {
     return document.getElementById(id).contentWindow;
   },
 
+  isArray: function(someVar){
+     return Object.prototype.toString.call( someVar ) === '[object Array]';
+  },
+  
   deepEqual: function(a, b) {
     // check object identity
     if (a === b) return true;
@@ -24,6 +28,11 @@ var SpecHelper = {
     var atype = typeof a
     var btype = typeof b;
     if (atype !== btype) return false;
+    // Arrays?
+    var aarr = SpecHelper.isArray(a)
+    var barr = SpecHelper.isArray(b);
+    if (aarr !== barr) return false;
+    
     // basic equality test (watch out for coercions)
     if (a == b) return true;
     // one is falsy and the other truthy

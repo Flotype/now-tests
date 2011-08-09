@@ -48,6 +48,55 @@ describe("Variable Sync", function() {
     
   });
   
+  it("can handle array and object sync edge cases", function() {
+    
+    function setIfEqual(k, v) {
+      console.log(v, val);
+      equals = SpecHelper.deepEqual(val, v) && key === k;
+    }
+    
+    var key = SpecHelper.generateRandomString();
+    var val = [];
+    
+    // Create new variables
+    now[key] = val;
+    
+    
+    // Call server function to check if value synced
+    var equals;
+    runs(function(){
+      now.variableCheck(key, setIfEqual);
+    });
+    
+    waitsFor(function(){
+      return equals;
+    }, "setting of array leaf node", 5000);
+    
+    runs(function(){
+      expect(equals).toBeTruthy();
+    });
+    
+    runs(function(){
+      val = {};
+      now[key] = val; 
+      equals = false;
+    });
+    
+    
+    runs(function(){
+      now.variableCheck(key, setIfEqual);
+    });
+    
+    waitsFor(function(){
+      return equals;
+    }, "setting of object leaf node", 5000);
+    
+    runs(function(){
+      expect(equals).toBeTruthy();
+    });
+    
+  });
+  
   
   it("can create terminal non-leaf nodes and do something with later ", function() {
     
