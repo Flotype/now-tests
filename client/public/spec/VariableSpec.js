@@ -51,7 +51,6 @@ describe("Variable Sync", function() {
   it("can handle array and object sync edge cases", function() {
     
     function setIfEqual(k, v) {
-      console.log(v, val);
       equals = SpecHelper.deepEqual(val, v) && key === k;
     }
     
@@ -61,7 +60,7 @@ describe("Variable Sync", function() {
     // Create new variables
     now[key] = val;
     
-    
+   
     // Call server function to check if value synced
     var equals;
     runs(function(){
@@ -81,7 +80,7 @@ describe("Variable Sync", function() {
       now[key] = val; 
       equals = false;
     });
-    
+
     
     runs(function(){
       now.variableCheck(key, setIfEqual);
@@ -90,9 +89,93 @@ describe("Variable Sync", function() {
     waitsFor(function(){
       return equals;
     }, "setting of object leaf node", 5000);
+       
+    runs(function(){
+      expect(equals).toBeTruthy();
+    });
+    
+    runs(function(){
+      val = {a:1, b:2};
+      now[key] = val; 
+      equals = false;
+    });
+    
+    
+    runs(function(){
+      now.variableCheck(key, setIfEqual);
+    });
+     
+    waitsFor(function(){
+      return equals;
+    }, "setting of object with children leaf node", 5000);
     
     runs(function(){
       expect(equals).toBeTruthy();
+    });
+
+    runs(function(){
+      val.a = [];
+      equals = false;
+      setTimeout(function(){
+      val.b = {};
+      }, 500);
+    });
+   
+    runs(function(){
+      now.variableCheck(key, setIfEqual);
+    });
+ 
+    waitsFor(function(){
+      return equals;
+    }, "setting of object child array leaf node", 5000);
+   
+    runs(function(){
+      expect(equals).toBeTruthy();
+    });
+     
+    runs(function(){
+      val.b = {};
+      equals = false;
+    });
+   
+   
+    runs(function(){
+      now.variableCheck(key, setIfEqual);
+    });
+    
+    waitsFor(function(){
+      return equals;
+    }, "setting of object child object leaf node", 5000);
+    
+    runs(function(){
+      expect(equals).toBeTruthy();
+    });
+    
+        
+    runs(function(){
+      val = ['1','2'];
+      now[key] = val; 
+      equals = false;
+    });
+    
+    
+    runs(function(){
+      now.variableCheck(key, setIfEqual);
+    });
+    
+    waitsFor(function(){
+      return equals;
+    }, "make sures arrays sent are still arrays", 5000);
+    
+    runs(function(){
+      expect(equals).toBeTruthy();
+    });
+    
+    runs(function(){
+      now.x = {};
+      now.x.y = false;
+      now.x.y = {a:1};
+      expect(now.x.y.a).toEqual(1);
     });
     
   });
@@ -128,7 +211,6 @@ describe("Variable Sync", function() {
       now[key2] = {a: 1, b: []};
       
       now.variableCheck(key2, function(k, v) {
-        console.log(arguments);
         equals = v.b.length === 0;  
       });
     });

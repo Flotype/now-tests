@@ -11,9 +11,14 @@ var server = require('http').createServer(function (request, response) {
     });
 });
 
+
+
+server.listen(80);
+
 var nowjs = require('now');
 
-var everyone = nowjs.initialize(server);
+var everyone = nowjs.initialize(server, {socketio: {'log level': 3}});
+
 
 
 everyone.now.variableCheck = function(key, cb) {
@@ -48,5 +53,3 @@ everyone.now.eval = function(code){
 everyone.now.joinGroup = function(group) {
   nowjs.getGroup(group).addUser(this.user.clientId);
 }
-
-server.listen(80)
