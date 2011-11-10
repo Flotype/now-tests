@@ -178,6 +178,15 @@ describe("Variable Sync", function() {
       expect(now.x.y.a).toEqual(1);
     });
     
+    runs(function(){
+      now.j = function(){};
+    });
+    waits(1000);
+    runs(function(){
+      now.j = function(){2};
+      expect(typeof now.j).toEqual("function");
+    });
+    
   });
   
   
