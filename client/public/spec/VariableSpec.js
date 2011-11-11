@@ -116,9 +116,6 @@ describe("Variable Sync", function() {
     runs(function(){
       val.a = [];
       equals = false;
-      setTimeout(function(){
-      val.b = {};
-      }, 500);
     });
    
     runs(function(){
