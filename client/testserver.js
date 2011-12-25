@@ -36,6 +36,14 @@ everyone.now.multipleCallbacks = function(cb1, cb2) {
 
 everyone.now.setEveryoneValue = function(key, val) {
   everyone.now[key] = val;
+  console.log("*********", key, '=>', val);
+}
+
+everyone.now.test = function(key){
+  everyone.now['poop'] = key;
+  everyone.now[key] = 'doo';
+  eval('everyone.now["x"] = 3;');
+  
 }
 
 everyone.now.setGroupValue = function(group, key, val) {
@@ -47,9 +55,23 @@ everyone.now.setValue = function(key, val){
 }
 
 everyone.now.eval = function(code){
+  console.log(code);
   eval(code);
 }
 
-everyone.now.joinGroup = function(group) {
-  nowjs.getGroup(group).addUser(this.user.clientId);
+everyone.now.joinGroup = function(groupName, cb) {
+  var group = nowjs.getGroup(groupName);
+  group.addUser(this.user.clientId);
+}
+
+everyone.now.removeGroupTest = function(groupName, cb) {
+  var clientId = this.user.clientId;
+  var group = nowjs.getGroup(groupName);
+  group.addUser(clientId);
+  group.on('leave', function() {
+    if(this.user.clientId == clientId) {
+      cb();
+    }
+  });
+  nowjs.removeGroup(group);
 }

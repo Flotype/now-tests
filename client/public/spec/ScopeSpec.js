@@ -122,4 +122,25 @@ describe("Server scoping tests", function() {
       expect(called).toBeTruthy();
     });
   });
+  
+  it("removeGroup removes all users from group and triggers callback", function() {
+    var called = false;
+    
+    var groupName = SpecHelper.generateRandomString();
+    var val = function(){
+      called = true;
+    };
+    
+    now.removeGroupTest(groupName, val);
+    
+    waitsFor(function(){
+      return called;
+    }, "generated callback to be called", 2000);
+    
+    runs(function(){
+      expect(called).toBeTruthy();
+    });
+    
+  });
+  
 });
