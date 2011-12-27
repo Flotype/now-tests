@@ -17,7 +17,7 @@ server.listen(80);
 
 var nowjs = require('now');
 
-var everyone = nowjs.initialize(server, {socketio: {'log level': 3}});
+var everyone = nowjs.initialize(server, {socketio: {'log level': 1}});
 
 
 
@@ -73,5 +73,5 @@ everyone.now.removeGroupTest = function(groupName, cb) {
       cb();
     }
   });
-  nowjs.removeGroup(group);
+  nowjs.removeGroup(groupName);
 }
